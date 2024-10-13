@@ -1,28 +1,62 @@
+#include <Wire.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
+#include <MPU6050.h>
 
 // Define the digital pin for the DS18B20 sensors
 #define ONE_WIRE_BUS 2
+#define IR_SENSOR_PIN 3  // IR module connected to digital pin 3 (Interrupt pin)
 
 // Create a oneWire instance to communicate with any OneWire devices
 OneWire oneWire(ONE_WIRE_BUS);
-
-// Pass oneWire reference to DallasTemperature library
 DallasTemperature sensors(&oneWire);
+MPU6050 accelgyro;
 
 // Define the ADC pins for the two sensors voltage and current
-int sensor1Pin = A0;  // Sensor 1: 0-500 range
-int sensor2Pin = A1;  // Sensor 2: 0-100 range
-int sensor3Pin = A2;  // Sensor 3: 0-500 range
-int sensor4Pin = A3;  // Sensor 4: 0-100 range
-int sensor5Pin = A4;  // Sensor 5: 0-500 range
-int sensor6Pin = A5;  // Sensor 6: 0-100 range
+int sensor1Pin = A0;
+int sensor2Pin = A1;
+int sensor3Pin = A2;
+int sensor4Pin = A3;
+int sensor5Pin = A4;
+int sensor6Pin = A5;
+
+// Variables for IR sensor RPM counting
+volatile int pulseCount = 0;
+unsigned long previousMillis = 0;
+const unsigned long interval = 1000;  // Time interval for RPM calculation (1 second)
+
+// Variables for speed estimation
+float accelX;            // X-axis acceleration from accelerometer
+float velocity = 0;       // Current velocity of the vehicle
+unsigned long lastTime;   // To keep track of time between updates
+float timeStep;           // Time interval for speed calculation (in seconds)
+
+// ISR to count pulses
+void IR_interrupt() {
+  pulseCount++;
+}
 
 void setup() {
   Serial.begin(9600);  // Initialize serial communication
 
   // Start the DS18B20 sensor library
   sensors.begin();
+
+  // Initialize IR sensor input and attach interrupt
+  pinMode(IR_SENSOR_PIN, INPUT);
+  attachInterrupt(digitalPinToInterrupt(IR_SENSOR_PIN), IR_interrupt, FALLING);  // Detect falling edge
+
+  // Initialize accelerometer
+  Wire.begin();
+  accelgyro.initialize();
+  
+  // Check connection
+  if (!accelgyro.testConnection()) {
+    Serial.println("MPU6050 connection failed");
+    while (1);
+  }
+
+  lastTime = millis();
 }
 
 void loop() {
@@ -41,77 +75,77 @@ void loop() {
   float rearinc  = (adcValue4 / 1023.0) * 100.0;
   float motorinv = (adcValue5 / 1023.0) * 500.0;
   float motorinc = (adcValue6 / 1023.0) * 100.0;
+
   // Request temperature readings from the DS18B20 sensors
   sensors.requestTemperatures();
-  
+
   // Print the analog sensor values
-  Serial.print("FRONT INVERTER VOLTAGE(v): ");
-  Serial.print(frontinv, 2);  // Print with 2 decimal points
+  Serial.print("FRONT INVERTER VOLTAGE(V): ");
+  Serial.println(frontinv, 2);
   Serial.print("FRONT INVERTER CURRENT(A): ");
-  Serial.print(frontinc, 2);  // Print with 2 decimal points
-  Serial.print("FRONT INVERTER POWER(kw):");
-  Serial.print((frontinv*frontinc));
-  Serial.print("REAR INVERTER VOLTAGE(v): ");
-  Serial.print(rearinv, 2);  // Print with 2 decimal points
+  Serial.println(frontinc, 2);
+  Serial.print("FRONT INVERTER POWER(kW): ");
+  Serial.println((frontinv * frontinc), 2);
+
+  Serial.print("REAR INVERTER VOLTAGE(V): ");
+  Serial.println(rearinv, 2);
   Serial.print("REAR INVERTER CURRENT(A): ");
-  Serial.print(rearinc, 2);  // Print with 2 decimal points
-  Serial.print("REAR INVERTER POWER(kw):");
-  Serial.print((rearinv*rearinc));
-  Serial.print("MOTOR INVERTER VOLTAGE(v): ");
-  Serial.print(motorinv, 2);  // Print with 2 decimal points
+  Serial.println(rearinc, 2);
+  Serial.print("REAR INVERTER POWER(kW): ");
+  Serial.println((rearinv * rearinc), 2);
+
+  Serial.print("MOTOR INVERTER VOLTAGE(V): ");
+  Serial.println(motorinv, 2);
   Serial.print("MOTOR INVERTER CURRENT(A): ");
-  Serial.print(motorinc, 2);  // Print with 2 decimal points
-  Serial.print("MOTOR INVERTER POWER(kw):");
-  Serial.print((motorinv*motorinc));
+  Serial.println(motorinc, 2);
+  Serial.print("MOTOR INVERTER POWER(kW): ");
+  Serial.println((motorinv * motorinc), 2);
 
-  // Print the temperature values from each DS18B20 sensor separately
-  float temp1 = sensors.getTempCByIndex(0);  // Get temperature from sensor 1
-  float temp2 = sensors.getTempCByIndex(1);  // Get temperature from sensor 2
-  float temp3 = sensors.getTempCByIndex(2);  // Get temperature from sensor 3
-  float temp4 = sensors.getTempCByIndex(3);  // Get temperature from sensor 4
-  float temp5 = sensors.getTempCByIndex(4);  // Get temperature from sensor 5
+  // Print temperature values
+  float temp1 = sensors.getTempCByIndex(0);
+  float temp2 = sensors.getTempCByIndex(1);
+  float temp3 = sensors.getTempCByIndex(2);
+  float temp4 = sensors.getTempCByIndex(3);
+  float temp5 = sensors.getTempCByIndex(4);
 
-  // Print each temperature value with error checking
   Serial.print(" | FRONT STATOR: ");
-  if (temp1 == DEVICE_DISCONNECTED_C) {
-    Serial.print("Error");
-  } else {
-    Serial.print(temp1, 2);
-    Serial.print("°C");
-  }
+  Serial.print((temp1 == DEVICE_DISCONNECTED_C) ? "Error" : String(temp1, 2) + "°C");
 
-  Serial.print(" | REAR  STATOR: ");
-  if (temp2 == DEVICE_DISCONNECTED_C) {
-    Serial.print("Error");
-  } else {
-    Serial.print(temp2, 2);
-    Serial.print("°C");
-  }
+  Serial.print(" | REAR STATOR: ");
+  Serial.print((temp2 == DEVICE_DISCONNECTED_C) ? "Error" : String(temp2, 2) + "°C");
 
   Serial.print(" | TRANSMISSION: ");
-  if (temp3 == DEVICE_DISCONNECTED_C) {
-    Serial.print("Error");
-  } else {
-    Serial.print(temp3, 2);
-    Serial.print("°C");
+  Serial.print((temp3 == DEVICE_DISCONNECTED_C) ? "Error" : String(temp3, 2) + "°C");
+
+  Serial.print(" | BATTERY INLET: ");
+  Serial.print((temp4 == DEVICE_DISCONNECTED_C) ? "Error" : String(temp4, 2) + "°C");
+
+  Serial.print(" | BATTERY TEMP: ");
+  Serial.println((temp5 == DEVICE_DISCONNECTED_C) ? "Error" : String(temp5, 2) + "°C");
+
+  // Calculate RPM
+  unsigned long currentMillis = millis();
+  if (currentMillis - previousMillis >= interval) {
+    previousMillis = currentMillis;
+    
+    int rpm = pulseCount * 60;  // Calculate RPM
+    pulseCount = 0;  // Reset pulse count for next interval
+    
+    Serial.print(" | RPM: ");
+    Serial.println(rpm);
   }
 
-  Serial.print(" | BATTERYINLET: ");
-  if (temp4 == DEVICE_DISCONNECTED_C) {
-    Serial.print("Error");
-  } else {
-    Serial.print(temp4, 2);
-    Serial.print("°C");
-  }
+  // Read accelerometer data and calculate speed
+  accelX = accelgyro.getAccelerationX() / 16384.0;  // MPU6050 gives raw values, convert to 'g'
+  
+  unsigned long currentTime = millis();
+  timeStep = (currentTime - lastTime) / 1000.0;  // Calculate time difference in seconds
+  lastTime = currentTime;
 
-  Serial.print(" | BATTERYTEMP: ");
-  if (temp5 == DEVICE_DISCONNECTED_C) {
-    Serial.print("Error");
-  } else {
-    Serial.print(temp5, 2);
-    Serial.print("°C");
-  }
+  velocity += accelX * 9.81 * timeStep;  // Integrate acceleration to get velocity (m/s), 9.81 m/s² is gravity
 
-  Serial.println();  // End of line for readability
+  Serial.print(" | Speed (m/s): ");
+  Serial.println(velocity);
+
   delay(1000);  // Wait for a second before the next reading
 }
