@@ -10,14 +10,13 @@ OneWire oneWire(ONE_WIRE_BUS);
 // Pass oneWire reference to DallasTemperature library
 DallasTemperature sensors(&oneWire);
 
-// Define the ADC pins for the two sensors
+// Define the ADC pins for the two sensors voltage and current
 int sensor1Pin = A0;  // Sensor 1: 0-500 range
 int sensor2Pin = A1;  // Sensor 2: 0-100 range
 int sensor3Pin = A2;  // Sensor 3: 0-500 range
 int sensor4Pin = A3;  // Sensor 4: 0-100 range
 int sensor5Pin = A4;  // Sensor 5: 0-500 range
 int sensor6Pin = A5;  // Sensor 6: 0-100 range
-
 
 void setup() {
   Serial.begin(9600);  // Initialize serial communication
@@ -28,12 +27,12 @@ void setup() {
 
 void loop() {
   // Read raw ADC values (0 to 1023 for 0-5V input)
-  int adcValue1 = analogRead(sensor1Pin);  // Read from sensor 1 (0-500)
-  int adcValue2 = analogRead(sensor2Pin);  // Read from sensor 2 (0-100)
-  int adcValue3 = analogRead(sensor3Pin);  // Read from sensor 1 (0-500)
-  int adcValue4 = analogRead(sensor4Pin);  // Read from sensor 2 (0-100)
-  int adcValue5 = analogRead(sensor5Pin);  // Read from sensor 1 (0-500)
-  int adcValue6 = analogRead(sensor6Pin);  // Read from sensor 2 (0-100)
+  int adcValue1 = analogRead(sensor1Pin);  // Read from sensor 1 V(0-500)
+  int adcValue2 = analogRead(sensor2Pin);  // Read from sensor 2 A(0-100)
+  int adcValue3 = analogRead(sensor3Pin);  // Read from sensor 3 V(0-500)
+  int adcValue4 = analogRead(sensor4Pin);  // Read from sensor 4 A(0-100)
+  int adcValue5 = analogRead(sensor5Pin);  // Read from sensor 5 V(0-500)
+  int adcValue6 = analogRead(sensor6Pin);  // Read from sensor 6 A(0-100)
 
   // Convert sensor 1's ADC value to a 0-500 range with 2 decimal places
   float frontinv = (adcValue1 / 1023.0) * 500.0;
@@ -44,7 +43,7 @@ void loop() {
   float motorinc = (adcValue6 / 1023.0) * 100.0;
   // Request temperature readings from the DS18B20 sensors
   sensors.requestTemperatures();
-
+  
   // Print the analog sensor values
   Serial.print("FRONT INVERTER VOLTAGE(v): ");
   Serial.print(frontinv, 2);  // Print with 2 decimal points
@@ -52,6 +51,18 @@ void loop() {
   Serial.print(frontinc, 2);  // Print with 2 decimal points
   Serial.print("FRONT INVERTER POWER(kw):");
   Serial.print((frontinv*frontinc));
+  Serial.print("REAR INVERTER VOLTAGE(v): ");
+  Serial.print(rearinv, 2);  // Print with 2 decimal points
+  Serial.print("REAR INVERTER CURRENT(A): ");
+  Serial.print(rearinc, 2);  // Print with 2 decimal points
+  Serial.print("REAR INVERTER POWER(kw):");
+  Serial.print((rearinv*rearinc));
+  Serial.print("MOTOR INVERTER VOLTAGE(v): ");
+  Serial.print(motorinv, 2);  // Print with 2 decimal points
+  Serial.print("MOTOR INVERTER CURRENT(A): ");
+  Serial.print(motorinc, 2);  // Print with 2 decimal points
+  Serial.print("MOTOR INVERTER POWER(kw):");
+  Serial.print((motorinv*motorinc));
 
   // Print the temperature values from each DS18B20 sensor separately
   float temp1 = sensors.getTempCByIndex(0);  // Get temperature from sensor 1
