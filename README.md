@@ -105,7 +105,7 @@ This project is open-source and licensed under the MIT License.
 ---
 
 ## Contact
-For any questions or support, please reach out to the project maintainer at `your_email@example.com`.
+For any questions or support, please reach out to the project maintainer at `a.adithyavardan1@gmail.com`.
 
 ---
 
