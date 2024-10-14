@@ -88,7 +88,7 @@ EVSMS/
 ├── TemperatureSensors.h     # Temperature sensor functions
 ├── ADCReadings.h            # ADC pin reading functions (Voltage/Current)
 ├── SpeedAndRPM.h            # Speed and RPM calculation functions
-├── EVSMS.ino          # Main sketch that calls the above modules
+├── EVSMS.ino                # Main sketch that calls the above modules
 ├── README.md                # This documentation
 ```
 
