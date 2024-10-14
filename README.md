@@ -33,7 +33,7 @@ EVSMS is a comprehensive monitoring system designed for electric vehicles (EVs) 
 - **TemperatureSensors.h**: Manages the DS18B20 temperature sensors.
 - **ADCReadings.h**: Reads analog values from ADC pins for voltage and current measurements.
 - **SpeedAndRPM.h**: Handles speed estimation from the accelerometer and RPM measurement from the IR sensor.
-- **MainProgram.ino**: The main Arduino sketch that initializes and integrates the modules, looping through and displaying data.
+- **EVSMS.ino**: The main Arduino sketch that initializes and integrates the modules, looping through and displaying data.
 
 ---
 
@@ -88,7 +88,7 @@ EVSMS/
 ├── TemperatureSensors.h     # Temperature sensor functions
 ├── ADCReadings.h            # ADC pin reading functions (Voltage/Current)
 ├── SpeedAndRPM.h            # Speed and RPM calculation functions
-├── MainProgram.ino          # Main sketch that calls the above modules
+├── EVSMS.ino          # Main sketch that calls the above modules
 ├── README.md                # This documentation
 ```
 
