@@ -1,3 +1,4 @@
+//VERSION-1.2.1
 #include <Wire.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
@@ -102,26 +103,21 @@ void loop() {
   Serial.println((motorinv * motorinc), 2);
 
   // Print temperature values
-  float temp1 = sensors.getTempCByIndex(0);
-  float temp2 = sensors.getTempCByIndex(1);
-  float temp3 = sensors.getTempCByIndex(2);
-  float temp4 = sensors.getTempCByIndex(3);
-  float temp5 = sensors.getTempCByIndex(4);
-
-  Serial.print(" | FRONT STATOR: ");
-  Serial.print((temp1 == DEVICE_DISCONNECTED_C) ? "Error" : String(temp1, 2) + "°C");
-
-  Serial.print(" | REAR STATOR: ");
-  Serial.print((temp2 == DEVICE_DISCONNECTED_C) ? "Error" : String(temp2, 2) + "°C");
-
-  Serial.print(" | TRANSMISSION: ");
-  Serial.print((temp3 == DEVICE_DISCONNECTED_C) ? "Error" : String(temp3, 2) + "°C");
-
-  Serial.print(" | BATTERY INLET: ");
-  Serial.print((temp4 == DEVICE_DISCONNECTED_C) ? "Error" : String(temp4, 2) + "°C");
-
-  Serial.print(" | BATTERY TEMP: ");
-  Serial.println((temp5 == DEVICE_DISCONNECTED_C) ? "Error" : String(temp5, 2) + "°C");
+  float temp[5] = {sensors.getTempCByIndex(0),
+                  sensors.getTempCByIndex(1),
+                  sensors.getTempCByIndex(2),
+                  sensors.getTempCByIndex(3),
+                  sensors.getTempCByIndex(4)};
+  string sensor_names[5] = {"FRONT STATOR",
+                            "REAR STATOR",
+                            "TRANSMISSION",
+                            "BATTERY INLET",
+                            "BATTERY TEMP"};
+  for(int i =0;i<=4;i++)
+  {
+    Serial.print(sensor_names(i)+":-");
+    Serial.print((temp(i) == DEVICE_DISCONNECTED_C) ? "Error\n" : String(temp(i), 2) + "°C\n");
+  }
 
   // Calculate RPM
   unsigned long currentMillis = millis();
