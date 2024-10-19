@@ -17,10 +17,15 @@ void initCSVLogger() {
     }
     Serial.println("SD Card initialized.");
 
-    // Create or open the CSV file and write the header row
+    // Create or open the CSV file and write the header row with value names
     File dataFile = SD.open("evsms_data.csv", FILE_WRITE);
     if (dataFile) {
-        dataFile.println("FrontInvV, FrontInvC, FrontInvPower, RearInvV, RearInvC, RearInvPower, MotorInvV, MotorInvC, MotorInvPower, FrontStatorTemp, RearStatorTemp, TransmissionTemp, BatteryInletTemp, BatteryTemp, Speed, RPM");
+        // Write the header row with descriptive value names
+        dataFile.println("Front Inverter Voltage (V), Front Inverter Current (A), Front Inverter Power (kW), "
+                         "Rear Inverter Voltage (V), Rear Inverter Current (A), Rear Inverter Power (kW), "
+                         "Motor Inverter Voltage (V), Motor Inverter Current (A), Motor Inverter Power (kW), "
+                         "Front Stator Temperature (°C), Rear Stator Temperature (°C), Transmission Temperature (°C), "
+                         "Battery Inlet Temperature (°C), Battery Temperature (°C), Speed (m/s), RPM");
         dataFile.close();
     } else {
         Serial.println("Error opening evsms_data.csv file");
@@ -53,36 +58,36 @@ void logDataToCSV() {
     File dataFile = SD.open("evsms_data.csv", FILE_WRITE);
     if (dataFile) {
         // Write the sensor data in CSV format
-        dataFile.print(frontinv);
+        dataFile.print(frontinv);     // Front inverter voltage
         dataFile.print(",");
-        dataFile.print(frontinc);
+        dataFile.print(frontinc);     // Front inverter current
         dataFile.print(",");
-        dataFile.print(frontPower);
+        dataFile.print(frontPower);   // Front inverter power
         dataFile.print(",");
-        dataFile.print(rearinv);
+        dataFile.print(rearinv);      // Rear inverter voltage
         dataFile.print(",");
-        dataFile.print(rearinc);
+        dataFile.print(rearinc);      // Rear inverter current
         dataFile.print(",");
-        dataFile.print(rearPower);
+        dataFile.print(rearPower);    // Rear inverter power
         dataFile.print(",");
-        dataFile.print(motorinv);
+        dataFile.print(motorinv);     // Motor inverter voltage
         dataFile.print(",");
-        dataFile.print(motorinc);
+        dataFile.print(motorinc);     // Motor inverter current
         dataFile.print(",");
-        dataFile.print(motorPower);
+        dataFile.print(motorPower);   // Motor inverter power
         dataFile.print(",");
-        
+
         // Log temperature values (front stator, rear stator, transmission, battery inlet, battery temp)
         for (int i = 0; i < 5; i++) {
             dataFile.print(temps[i]);
             if (i < 4) dataFile.print(",");
         }
-        
+
         // Log speed and RPM
         dataFile.print(",");
-        dataFile.print(speed);
+        dataFile.print(speed);        // Vehicle speed
         dataFile.print(",");
-        dataFile.println(rpm);
+        dataFile.println(rpm);        // RPM value
 
         dataFile.close();  // Close the file after writing
     } else {
