@@ -16,6 +16,7 @@ EVSMS is a comprehensive monitoring system designed for electric vehicles (EVs) 
 - **RPM Calculation**: Measure and display the RPM of a rotating component using an IR sensor.
 - **Speed Estimation**: Estimate and display the speed of the vehicle using an MPU6050 accelerometer for real-time acceleration data.
 - **Modular Code Structure**: The system is divided into separate modules for temperature sensing, ADC readings, and speed & RPM calculations, ensuring clean and maintainable code.
+- **CSV LOGGER**: The code also has a logging system which helps to store the data in the sd card in a csv file format which can be used for running ML models .
 
 ---
 
@@ -34,6 +35,7 @@ EVSMS is a comprehensive monitoring system designed for electric vehicles (EVs) 
 - **ADCReadings.h**: Reads analog values from ADC pins for voltage and current measurements.
 - **SpeedAndRPM.h**: Handles speed estimation from the accelerometer and RPM measurement from the IR sensor.
 - **EVSMS.ino**: The main Arduino sketch that initializes and integrates the modules, looping through and displaying data.
+- **CSVLogger.h**: This handles the data logging aspects of the test rig and converts the data into csv data file 
 
 ---
 
@@ -53,6 +55,7 @@ EVSMS is a comprehensive monitoring system designed for electric vehicles (EVs) 
      - `DallasTemperature`
      - `OneWire`
      - `MPU6050`
+     - `SD`
 3. **Clone or Download this Repository** to your local machine.
 
 ### Step 3: Code Upload
@@ -85,6 +88,7 @@ The main loop cycles through each monitoring task:
 ```plaintext
 EVSMS/
 │
+├── CSVLogger.h              # Data logging into CSV file
 ├── TemperatureSensors.h     # Temperature sensor functions
 ├── ADCReadings.h            # ADC pin reading functions (Voltage/Current)
 ├── SpeedAndRPM.h            # Speed and RPM calculation functions
