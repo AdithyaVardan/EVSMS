@@ -1,4 +1,4 @@
-//VERSION-1.4.1
+//VERSION-1.4.2
 #include "TemperatureSensors.h"
 #include "ADCReadings.h"
 #include "SpeedAndRPM.h"
