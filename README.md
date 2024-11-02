@@ -1,7 +1,3 @@
-### README for EVSMS - Electric Vehicle Stats Monitoring System
-
----
-
 # EVSMS (Electric Vehicle Stats Monitoring System)
 
 ## Overview
