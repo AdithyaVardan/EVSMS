@@ -26,6 +26,10 @@ EVSMS is a comprehensive monitoring system designed for electric vehicles (EVs) 
 
 ---
 
+## HARDWARE OVERVIEW
+![WhatsApp Image 2024-11-08 at 12 55 04_1deee299](https://github.com/user-attachments/assets/2d9391d1-0728-430a-90e8-14ee5a05d793)
+
+
 ## Software Components
 - **TemperatureSensors.h**: Manages the DS18B20 temperature sensors.
 - **ADCReadings.h**: Reads analog values from ADC pins for voltage and current measurements.
